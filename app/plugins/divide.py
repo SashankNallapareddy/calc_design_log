@@ -1,21 +1,22 @@
 from app.commands import Command
+import logging
 
 class DivideCommand(Command):
     def execute(self, *args):
         try:
             numbers = [float(arg) for arg in args]
             if len(numbers) < 2:
-                print("Error: Need at least two numbers to perform division.")
+                logging.error("Error: Need at least two numbers to perform division.")
                 return
-            result = numbers[0]
-            for denominator in numbers[1:]:
+            result = numbers.pop(0)
+            for denominator in numbers:
                 if denominator == 0:
-                    print("Error: Division by zero is not allowed.")
+                    logging.error("Error: Division by zero is not allowed.")
                     return
                 result /= denominator
-            print(f"Result: {result}")
+            logging.info(f"Result: {result}")
         except ValueError:
-            print("Error: All arguments must be numbers.")
+            logging.error("Error: All arguments must be numbers.")
 
 def get_command_instance(command_handler=None):
     return DivideCommand()

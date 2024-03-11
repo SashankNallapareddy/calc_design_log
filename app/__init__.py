@@ -2,14 +2,21 @@ from .command_handler import CommandHandler
 from .commands import ExitApplication
 import os
 import importlib.util
+import logging
 
 class App:
     command_handler = CommandHandler()
 
     @classmethod
+    def configure_logging(cls):
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    @classmethod
     def load_plugins(cls, directory="plugins"):
-        base_dir = os.path.dirname(__file__)  # Gets the directory of the current file
+        cls.configure_logging()
+        base_dir = os.path.dirname(__file__)
         plugins_dir = os.path.abspath(os.path.join(base_dir, directory))
+        logging.info("Loading plugins...")
 
         for filename in os.listdir(plugins_dir):
             if filename.endswith(".py") and not filename.startswith("__"):
@@ -20,12 +27,12 @@ class App:
                 spec.loader.exec_module(module)
                 command_instance = module.get_command_instance(cls.command_handler)
                 cls.command_handler.register_command(module_name, command_instance)
-                print(f"Loaded plugin: {module_name}")
+                logging.info(f"Loaded plugin: {module_name}")
 
     @classmethod
     def start(cls):
         cls.load_plugins()
-        print("Hello World. Type 'exit' to exit.")
+        logging.info("Hello World. Type 'exit' to exit.")
         try:
             while True:
                 input_text = input("").strip()
@@ -38,8 +45,7 @@ class App:
                 if command_name in cls.command_handler.commands:
                     cls.command_handler.execute_command(command_name, *args)
                 else:
-                    print("Unknown command. Type 'exit' to exit.")
+                    logging.info("Unknown command. Type 'exit' to exit.")
 
         except ExitApplication:
-            pass
-
+            logging.info("Exiting...")
